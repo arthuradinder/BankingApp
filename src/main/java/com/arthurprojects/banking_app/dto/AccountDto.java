@@ -11,18 +11,4 @@ public class AccountDto {
     private String accountHolderName;
     private double balance;
 
-    public AccountDto(Long id, String accountHolderName, String accountHolderName1) {
-    }
-
-    public double getBalance() {
-        return balance;
-    }
-
-    public String getAccountHolderName() {
-        return accountHolderName;
-    }
-
-    public Long getId() {
-        return id;
-    }
 }
