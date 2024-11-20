@@ -10,6 +10,7 @@ public class AccountMapper {
         Account account = new Account();
         account.setAccountHolderName(accountDto.getAccountHolderName());
         account.setBalance(accountDto.getBalance());
+        account.setId(accountDto.getId());
         return account;
     }
     //converting Account Jpa entity to dto
