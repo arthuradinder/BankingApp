@@ -6,6 +6,9 @@ import com.arthurprojects.banking_app.dto.WithdrawalRequest;
 import com.arthurprojects.banking_app.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -29,6 +32,11 @@ public class AccountController {
     @GetMapping("/{id}")
     public ResponseEntity<AccountDto> getAccountById(@PathVariable Long id) {
         return ResponseEntity.ok(accountService.getAccountById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<AccountDto>> getAllAccounts(@PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(accountService.getAllAccounts(pageable));
     }
 
     @PostMapping("/{id}/deposit")

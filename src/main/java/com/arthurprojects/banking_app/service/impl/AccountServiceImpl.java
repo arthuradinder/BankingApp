@@ -11,6 +11,8 @@ import com.arthurprojects.banking_app.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +41,12 @@ public class AccountServiceImpl implements AccountService {
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found with id: " + id));
 
         return modelMapper.map(account, AccountDto.class);
+    }
+
+    @Override
+    public Page<AccountDto> getAllAccounts(Pageable pageable) {
+        Page<Account> accountPage = accountRepository.findAll(pageable);
+        return accountPage.map(account -> modelMapper.map(account, AccountDto.class));
     }
 
     @Override
