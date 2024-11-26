@@ -2,7 +2,9 @@ package com.arthurprojects.banking_app.service.impl;
 
 import com.arthurprojects.banking_app.dto.AccountDto;
 import com.arthurprojects.banking_app.dto.CreateAccountRequest;
+import com.arthurprojects.banking_app.dto.WithdrawalRequest;
 import com.arthurprojects.banking_app.entity.Account;
+import com.arthurprojects.banking_app.exception.InsufficientBalanceException;
 import com.arthurprojects.banking_app.exception.ResourceNotFoundException;
 import com.arthurprojects.banking_app.repository.AccountRepository;
 import com.arthurprojects.banking_app.service.AccountService;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
+    private static final double WITHDRAWAL_CHARGE = 50.00;
 
     private final AccountRepository accountRepository;
     private final ModelMapper modelMapper;
@@ -39,11 +42,6 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public AccountDto deposit(Long id, double amount) {
-        return null;
-    }
-
-    @Override
     public AccountDto deposit(Long id, Double amount) {
         if (amount <= 0) {
             throw new IllegalArgumentException("Deposit amount must be greater than zero");
@@ -55,6 +53,30 @@ public class AccountServiceImpl implements AccountService {
         account.setBalance(account.getBalance() + amount);
         Account updatedAccount = accountRepository.save(account);
 
+        return modelMapper.map(updatedAccount, AccountDto.class);
+    }
+
+    @Override
+    public AccountDto withdraw(Long id, WithdrawalRequest request) {
+        Account account = accountRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found with id: " + id));
+
+        double withdrawalAmount = request.getAmount();
+        double totalDeduction = withdrawalAmount + WITHDRAWAL_CHARGE;
+
+        // Check if balance is sufficient for withdrawal + charges
+        if (account.getBalance() < totalDeduction) {
+            throw new InsufficientBalanceException(
+                    String.format("Insufficient balance. Required amount: %.2f (Withdrawal: %.2f + Charges: %.2f), Available balance: %.2f",
+                            totalDeduction, withdrawalAmount, WITHDRAWAL_CHARGE, account.getBalance())
+            );
+        }
+
+        // Perform withdrawal
+        double newBalance = account.getBalance() - totalDeduction;
+        account.setBalance(newBalance);
+
+        Account updatedAccount = accountRepository.save(account);
         return modelMapper.map(updatedAccount, AccountDto.class);
     }
 }

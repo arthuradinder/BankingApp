@@ -2,6 +2,7 @@ package com.arthurprojects.banking_app.controller;
 
 import com.arthurprojects.banking_app.dto.AccountDto;
 import com.arthurprojects.banking_app.dto.CreateAccountRequest;
+import com.arthurprojects.banking_app.dto.WithdrawalRequest;
 import com.arthurprojects.banking_app.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,5 +38,12 @@ public class AccountController {
             throw new IllegalArgumentException("Amount is required");
         }
         return ResponseEntity.ok(accountService.deposit(id, amount));
+    }
+
+    @PostMapping("/{id}/withdraw")
+    public ResponseEntity<AccountDto> withdraw(
+            @PathVariable Long id,
+            @Valid @RequestBody WithdrawalRequest request) {
+        return ResponseEntity.ok(accountService.withdraw(id, request));
     }
 }
