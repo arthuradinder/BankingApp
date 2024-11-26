@@ -1,14 +1,17 @@
 package com.arthurprojects.banking_app.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AccountDto {
     private Long id;
-    private String accountHolderName;
+    private String accountName;
     private double balance;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
 }

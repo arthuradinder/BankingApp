@@ -8,7 +8,7 @@ public class AccountMapper {
     public static Account mapToAccount(AccountDto accountDto){
         //converting AccountDto to account
         Account account = new Account();
-        account.setAccountHolderName(accountDto.getAccountHolderName());
+        account.setAccountName(accountDto.getAccountName());
         account.setBalance(accountDto.getBalance());
         account.setId(accountDto.getId());
         return account;
@@ -16,7 +16,7 @@ public class AccountMapper {
     //converting Account Jpa entity to dto
     public static AccountDto mapToAccountDto(Account account){
         AccountDto accountDto = new AccountDto();
-        accountDto.setAccountHolderName(account.getAccountHolderName());
+        accountDto.setAccountName(account.getAccountName());
         accountDto.setBalance(accountDto.getBalance());
         accountDto.setId(accountDto.getId());
         return accountDto;
