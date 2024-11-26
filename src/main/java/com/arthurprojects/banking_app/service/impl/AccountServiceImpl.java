@@ -2,6 +2,7 @@ package com.arthurprojects.banking_app.service.impl;
 
 import com.arthurprojects.banking_app.dto.AccountDto;
 import com.arthurprojects.banking_app.dto.CreateAccountRequest;
+import com.arthurprojects.banking_app.dto.DeleteResponseDTO;
 import com.arthurprojects.banking_app.dto.WithdrawalRequest;
 import com.arthurprojects.banking_app.entity.Account;
 import com.arthurprojects.banking_app.exception.InsufficientBalanceException;
@@ -86,5 +87,19 @@ public class AccountServiceImpl implements AccountService {
 
         Account updatedAccount = accountRepository.save(account);
         return modelMapper.map(updatedAccount, AccountDto.class);
+    }
+
+    @Override
+    public DeleteResponseDTO deleteAccount(Long id) {
+        Account account = accountRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found with id: " + id));
+
+        // Check if account has zero balance so as not to delete
+        if (account.getBalance() > 0) {
+            throw new IllegalStateException("Cannot delete account with non-zero balance: " + account.getBalance());
+        }
+
+        accountRepository.delete(account);
+        return new DeleteResponseDTO(String.format("Account with id: %d deleted successfully", id));
     }
 }

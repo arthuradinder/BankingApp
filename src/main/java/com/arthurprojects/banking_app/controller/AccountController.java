@@ -2,6 +2,7 @@ package com.arthurprojects.banking_app.controller;
 
 import com.arthurprojects.banking_app.dto.AccountDto;
 import com.arthurprojects.banking_app.dto.CreateAccountRequest;
+import com.arthurprojects.banking_app.dto.DeleteResponseDTO;
 import com.arthurprojects.banking_app.dto.WithdrawalRequest;
 import com.arthurprojects.banking_app.service.AccountService;
 import jakarta.validation.Valid;
@@ -11,7 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -53,5 +53,11 @@ public class AccountController {
             @PathVariable Long id,
             @Valid @RequestBody WithdrawalRequest request) {
         return ResponseEntity.ok(accountService.withdraw(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<DeleteResponseDTO> deleteAccount(@PathVariable Long id) {
+        DeleteResponseDTO response = accountService.deleteAccount(id);
+        return ResponseEntity.ok(response);
     }
 }
