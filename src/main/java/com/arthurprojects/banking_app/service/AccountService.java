@@ -15,4 +15,5 @@ public interface AccountService {
     AccountDto withdraw(Long id, WithdrawalRequest request);
     Page<AccountDto> getAllAccounts(Pageable pageable);
     DeleteResponseDTO deleteAccount(Long id);
+    void optimizeIds();
 }

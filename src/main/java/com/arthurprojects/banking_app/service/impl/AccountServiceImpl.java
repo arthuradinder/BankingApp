@@ -9,14 +9,21 @@ import com.arthurprojects.banking_app.exception.InsufficientBalanceException;
 import com.arthurprojects.banking_app.exception.ResourceNotFoundException;
 import com.arthurprojects.banking_app.repository.AccountRepository;
 import com.arthurprojects.banking_app.service.AccountService;
+import com.arthurprojects.banking_app.util.SequenceManager;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -25,6 +32,9 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
     private final ModelMapper modelMapper;
+
+    @Autowired
+    private SequenceManager sequenceManager;
 
     @Override
     public AccountDto createAccount(CreateAccountRequest request) {
@@ -90,16 +100,47 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @Transactional
     public DeleteResponseDTO deleteAccount(Long id) {
-        Account account = accountRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Account not found with id: " + id));
+        log.info("Starting deletion process for account id: {}", id);
+        try {
+            log.info("Fetching account with id: {}", id);
+            Account account = accountRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Account not found with id: " + id));
 
-        // Check if account has zero balance so as not to delete
-        if (account.getBalance() > 0) {
-            throw new IllegalStateException("Cannot delete account with non-zero balance: " + account.getBalance());
+            // Check if account has zero balance so as not to delete
+            log.info("Found account. Current balance: {}", account.getBalance());
+            if (account.getBalance() != 0) {
+                log.warn("Cannot delete account {} due to non-zero balance: {}", id, account.getBalance());
+                throw new IllegalStateException(
+                        String.format("Cannot delete account with non-zero balance: %.2f", account.getBalance())
+                );
+            }
+
+            log.info("Proceeding with deletion of account id: {}", id);
+            accountRepository.deleteById(id);
+            log.info("Account deleted from repository");
+
+            log.info("Resetting sequence");
+            sequenceManager.resetAccountSequence();
+            log.info("Sequence reset completed");
+
+            return DeleteResponseDTO.builder()
+                    .message(String.format("Account with id: %d deleted successfully", id))
+                    .timestamp(LocalDateTime.now())
+                    .id(UUID.randomUUID())
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Error deleting account with id: {}", id, e);
+            throw e;
         }
+    }
 
-        accountRepository.delete(account);
-        return new DeleteResponseDTO(String.format("Account with id: %d deleted successfully", id));
+
+    @Override
+    @Transactional
+    public void optimizeIds() {
+        sequenceManager.optimizeAccountSequence();
     }
 }

@@ -1,5 +1,6 @@
 package com.arthurprojects.banking_app.entity;
 
+import com.arthurprojects.banking_app.listener.AccountEntityListener;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Table(name = "accounts")
 @Entity
+@EntityListeners(AccountEntityListener.class)
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
